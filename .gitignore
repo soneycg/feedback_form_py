@@ -1,6 +1,7 @@
 # Byte-compiled / optimized / DLL files
 ### clau
 .claude
+.env
 ##
 __pycache__/
 *.py[cod]
