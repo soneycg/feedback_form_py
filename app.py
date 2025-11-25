@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Response
+from functools import wraps
 import json
 from datetime import datetime
 import os
@@ -11,14 +12,40 @@ app.secret_key = 'your-secret-key-here-change-in-production'
 
 FEEDBACK_FILE = 'feedback_data.json'
 
-# Email Configuration - Update these with your SMTP settings
+# Admin credentials for /results page
+ADMIN_USERNAME = 'admin'
+ADMIN_PASSWORD = 'REMOVED_SECRET'
+
+def check_auth(username, password):
+    """Check if username/password combination is valid"""
+    return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
+
+def authenticate():
+    """Send 401 response to enable basic auth login"""
+    return Response(
+        'Access denied. Please login with valid credentials.',
+        401,
+        {'WWW-Authenticate': 'Basic realm="Admin Access Required"'}
+    )
+
+def requires_auth(f):
+    """Decorator to require authentication"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
+# Email Configuration - Brevo SMTP
 EMAIL_CONFIG = {
-    'smtp_server': 'smtp.example.com',  # e.g., 'smtp.gmail.com', 'smtp.office365.com'
-    'smtp_port': 587,                    # Usually 587 for TLS, 465 for SSL
-    'smtp_username': 'your-email@example.com',
-    'smtp_password': 'your-app-password',
-    'sender_email': 'your-email@example.com',
-    'recipient_email': 'recipient@example.com',  # Where to send feedback reports
+    'smtp_server': 'smtp-relay.brevo.com',
+    'smtp_port': 587,
+    'smtp_username': '9c7960001@smtp-brevo.com',
+    'smtp_password': 'REMOVED_SECRET',
+    'sender_email': 'soney@shalombeats.com',
+    'recipient_email': 'soneycgeorge@gmail.com',
     'use_tls': True
 }
 
@@ -139,95 +166,187 @@ def format_single_feedback_email(feedback):
     return html
 
 def format_all_feedback_email(feedback_list):
-    """Format all feedback for email report"""
+    """Format all feedback for email report with complete details"""
     if not feedback_list:
         return "<p>No feedback submissions yet.</p>"
 
     # Calculate statistics
     total = len(feedback_list)
     avg_rating = sum(int(f.get('overall_rating', 0)) for f in feedback_list) / total
+    avg_performance = sum(int(f.get('performance_quality', 0)) for f in feedback_list) / total
+    avg_sound = sum(int(f.get('sound_quality', 0)) for f in feedback_list) / total
+    avg_venue = sum(int(f.get('venue_atmosphere', 0)) for f in feedback_list) / total
+    avg_food = sum(int(f.get('value_for_money', 0)) for f in feedback_list) / total
     recommend_pct = sum(1 for f in feedback_list if f.get('would_recommend') == 'yes') / total * 100
     attend_pct = sum(1 for f in feedback_list if f.get('attend_again') == 'yes') / total * 100
 
-    feedback_rows = ""
-    for f in reversed(feedback_list):
-        feedback_rows += f"""
-        <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">{f.get('timestamp', 'N/A')}</td>
-            <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">{f.get('name', 'Anonymous') or 'Anonymous'}</td>
-            <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;"><strong>{f.get('overall_rating', 'N/A')}/5</strong></td>
-            <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">{f.get('performance_quality', 'N/A')}/5</td>
-            <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">{f.get('sound_quality', 'N/A')}/5</td>
-            <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">{f.get('venue_atmosphere', 'N/A')}/5</td>
-            <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">{f.get('value_for_money', 'N/A')}/5</td>
-            <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">{'Yes' if f.get('would_recommend') == 'yes' else 'No'}</td>
-        </tr>
-        """
+    # Build detailed feedback cards
+    feedback_cards = ""
+    for i, f in enumerate(reversed(feedback_list), 1):
+        name = f.get('name', 'Anonymous') or 'Anonymous'
+        email = f.get('email', '')
+
+        # Comments sections
+        comments_html = ""
+        if f.get('favorite_moment'):
+            comments_html += f'''
+            <div style="background: #f0f9ff; padding: 12px 15px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #1e3a5f;">
+                <div style="font-size: 11px; font-weight: bold; color: #1e3a5f; text-transform: uppercase; margin-bottom: 5px;">Favorite Moment</div>
+                <div style="color: #334155;">{f.get('favorite_moment')}</div>
+            </div>
+            '''
+        if f.get('improvements'):
+            comments_html += f'''
+            <div style="background: #fef3c7; padding: 12px 15px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #d97706;">
+                <div style="font-size: 11px; font-weight: bold; color: #d97706; text-transform: uppercase; margin-bottom: 5px;">Suggested Improvements</div>
+                <div style="color: #334155;">{f.get('improvements')}</div>
+            </div>
+            '''
+        if f.get('additional_comments'):
+            comments_html += f'''
+            <div style="background: #f1f5f9; padding: 12px 15px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #64748b;">
+                <div style="font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 5px;">Additional Comments</div>
+                <div style="color: #334155;">{f.get('additional_comments')}</div>
+            </div>
+            '''
+
+        feedback_cards += f'''
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 20px; overflow: hidden;">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #1e3a5f, #2c5282); padding: 15px 20px; color: white;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td>
+                            <div style="font-weight: bold; font-size: 16px;">{name}</div>
+                            {f'<div style="font-size: 13px; opacity: 0.9;">{email}</div>' if email else ''}
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="background: rgba(255,255,255,0.2); display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: bold;">
+                                ★ {f.get('overall_rating', 'N/A')}/5
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Body -->
+            <div style="padding: 20px;">
+                <div style="font-size: 12px; color: #64748b; margin-bottom: 15px;">Submitted: {f.get('timestamp', 'N/A')}</div>
+
+                <!-- Ratings Grid -->
+                <table width="100%" cellpadding="8" cellspacing="0" style="margin-bottom: 15px;">
+                    <tr>
+                        <td style="background: #f8fafc; border-radius: 6px; text-align: center; width: 25%;">
+                            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Performance</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #1e3a5f;">{f.get('performance_quality', 'N/A')}/5</div>
+                        </td>
+                        <td style="background: #f8fafc; border-radius: 6px; text-align: center; width: 25%;">
+                            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Sound</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #1e3a5f;">{f.get('sound_quality', 'N/A')}/5</div>
+                        </td>
+                        <td style="background: #f8fafc; border-radius: 6px; text-align: center; width: 25%;">
+                            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Venue</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #1e3a5f;">{f.get('venue_atmosphere', 'N/A')}/5</div>
+                        </td>
+                        <td style="background: #f8fafc; border-radius: 6px; text-align: center; width: 25%;">
+                            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Food</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #1e3a5f;">{f.get('value_for_money', 'N/A')}/5</div>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Comments -->
+                {comments_html}
+
+                <!-- Footer Tags -->
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                    <span style="display: inline-block; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 600; margin-right: 8px; {'background: #dcfce7; color: #166534;' if f.get('would_recommend') == 'yes' else 'background: #fee2e2; color: #991b1b;'}">
+                        {'✓' if f.get('would_recommend') == 'yes' else '✗'} Would Recommend
+                    </span>
+                    <span style="display: inline-block; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 600; {'background: #dcfce7; color: #166534;' if f.get('attend_again') == 'yes' else 'background: #fee2e2; color: #991b1b;'}">
+                        {'✓' if f.get('attend_again') == 'yes' else '✗'} Would Attend Again
+                    </span>
+                </div>
+            </div>
+        </div>
+        '''
 
     html = f"""
     <html>
     <head>
         <style>
-            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-            .container {{ max-width: 900px; margin: 0 auto; padding: 20px; }}
-            .header {{ background: #1e40af; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
-            .stats {{ display: flex; background: #f8fafc; border: 1px solid #e2e8f0; }}
-            .stat {{ flex: 1; padding: 20px; text-align: center; border-right: 1px solid #e2e8f0; }}
-            .stat:last-child {{ border-right: none; }}
-            .stat-value {{ font-size: 28px; font-weight: bold; color: #1e40af; }}
-            .stat-label {{ font-size: 12px; color: #64748b; text-transform: uppercase; }}
-            table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
-            th {{ background: #1e40af; color: white; padding: 12px 10px; text-align: left; font-size: 12px; text-transform: uppercase; }}
-            .footer {{ background: #e2e8f0; padding: 15px; text-align: center; font-size: 12px; color: #64748b; border-radius: 0 0 8px 8px; margin-top: 20px; }}
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #f1f5f9; margin: 0; padding: 0; }}
         </style>
     </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h2 style="margin: 0;">Feedback Report</h2>
-                <p style="margin: 5px 0 0 0;">Shalom Beats Musical Concert Middleton</p>
-                <p style="margin: 5px 0 0 0; font-size: 14px;">Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+    <body style="background: #f1f5f9; padding: 20px;">
+        <div style="max-width: 700px; margin: 0 auto;">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #1e3a5f, #0d2137); color: white; padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+                <h1 style="margin: 0; font-size: 24px;">Feedback Report</h1>
+                <p style="margin: 8px 0 0 0; opacity: 0.9;">Shalom Beats Musical Concert Middleton</p>
+                <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.7;">Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
             </div>
 
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-value">{total}</div>
-                    <div class="stat-label">Total Responses</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">{avg_rating:.1f}</div>
-                    <div class="stat-label">Avg Rating</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">{recommend_pct:.0f}%</div>
-                    <div class="stat-label">Would Recommend</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">{attend_pct:.0f}%</div>
-                    <div class="stat-label">Would Attend Again</div>
-                </div>
-            </div>
-
-            <table>
-                <thead>
+            <!-- Stats Summary -->
+            <div style="background: white; padding: 25px; border-bottom: 1px solid #e2e8f0;">
+                <h2 style="margin: 0 0 20px 0; font-size: 16px; color: #1e3a5f; text-transform: uppercase; letter-spacing: 1px;">Summary Statistics</h2>
+                <table width="100%" cellpadding="10" cellspacing="0">
                     <tr>
-                        <th>Date</th>
-                        <th>Name</th>
-                        <th>Overall</th>
-                        <th>Performance</th>
-                        <th>Sound</th>
-                        <th>Venue</th>
-                        <th>Food</th>
-                        <th>Recommend</th>
+                        <td style="background: #f8fafc; border-radius: 8px; text-align: center; width: 25%;">
+                            <div style="font-size: 32px; font-weight: bold; color: #1e3a5f;">{total}</div>
+                            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Responses</div>
+                        </td>
+                        <td style="background: #f8fafc; border-radius: 8px; text-align: center; width: 25%;">
+                            <div style="font-size: 32px; font-weight: bold; color: #f59e0b;">{avg_rating:.1f}</div>
+                            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Avg Rating</div>
+                        </td>
+                        <td style="background: #f8fafc; border-radius: 8px; text-align: center; width: 25%;">
+                            <div style="font-size: 32px; font-weight: bold; color: #10b981;">{recommend_pct:.0f}%</div>
+                            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Recommend</div>
+                        </td>
+                        <td style="background: #f8fafc; border-radius: 8px; text-align: center; width: 25%;">
+                            <div style="font-size: 32px; font-weight: bold; color: #ec4899;">{attend_pct:.0f}%</div>
+                            <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Attend Again</div>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    {feedback_rows}
-                </tbody>
-            </table>
+                </table>
 
-            <div class="footer">
-                Shalom Beats Musical Concert Feedback System
+                <!-- Category Averages -->
+                <h3 style="margin: 25px 0 15px 0; font-size: 14px; color: #475569;">Average Ratings by Category</h3>
+                <table width="100%" cellpadding="8" cellspacing="0">
+                    <tr>
+                        <td style="background: #f8fafc; border-radius: 6px; padding: 12px;">
+                            <span style="color: #64748b;">Performance:</span>
+                            <strong style="color: #1e3a5f; float: right;">{avg_performance:.1f}/5</strong>
+                        </td>
+                        <td style="background: #f8fafc; border-radius: 6px; padding: 12px;">
+                            <span style="color: #64748b;">Sound Quality:</span>
+                            <strong style="color: #1e3a5f; float: right;">{avg_sound:.1f}/5</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background: #f8fafc; border-radius: 6px; padding: 12px;">
+                            <span style="color: #64748b;">Venue & Atmosphere:</span>
+                            <strong style="color: #1e3a5f; float: right;">{avg_venue:.1f}/5</strong>
+                        </td>
+                        <td style="background: #f8fafc; border-radius: 6px; padding: 12px;">
+                            <span style="color: #64748b;">Food:</span>
+                            <strong style="color: #1e3a5f; float: right;">{avg_food:.1f}/5</strong>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Individual Feedback -->
+            <div style="background: #f1f5f9; padding: 25px;">
+                <h2 style="margin: 0 0 20px 0; font-size: 16px; color: #1e3a5f; text-transform: uppercase; letter-spacing: 1px;">All Feedback ({total} responses)</h2>
+                {feedback_cards}
+            </div>
+
+            <!-- Footer -->
+            <div style="background: #1e3a5f; color: white; padding: 20px; text-align: center; border-radius: 0 0 12px 12px;">
+                <p style="margin: 0; font-size: 13px; opacity: 0.9;">Shalom Beats Musical Concert Feedback System</p>
+                <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.7;">This report contains all feedback submissions</p>
             </div>
         </div>
     </body>
@@ -277,12 +396,14 @@ def thank_you():
     return render_template('thank_you.html')
 
 @app.route('/results')
+@requires_auth
 def results():
     """Display all feedback results (admin view)"""
     feedback_list = load_feedback()
     return render_template('results.html', feedback_list=feedback_list)
 
 @app.route('/send-report', methods=['POST'])
+@requires_auth
 def send_report():
     """Send all feedback as email report"""
     feedback_list = load_feedback()
