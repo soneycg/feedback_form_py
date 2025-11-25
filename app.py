@@ -57,7 +57,9 @@ def load_feedback():
     """Load existing feedback from JSON file"""
     if os.path.exists(FEEDBACK_FILE):
         with open(FEEDBACK_FILE, 'r') as f:
-            return json.load(f)
+            content = f.read().strip()
+            if content:
+                return json.loads(content)
     return []
 
 def save_feedback(feedback_list):
@@ -400,7 +402,6 @@ def thank_you():
     return render_template('thank_you.html')
 
 @app.route('/results')
-@requires_auth
 def results():
     """Display all feedback results (admin view)"""
     feedback_list = load_feedback()
