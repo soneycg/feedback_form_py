@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Results - ShalomBeats</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            height: 50px;
+            width: auto;
+        }
+
+        .header-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px 60px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            font-size: 0.9375rem;
+            color: #64748b;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 4px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.8125rem;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .feedback-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .feedback-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .feedback-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        .author-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .author-name {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 0.9375rem;
+        }
+
+        .author-email {
+            font-size: 0.8125rem;
+            color: #94a3b8;
+        }
+
+        .feedback-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #1e40af;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8125rem;
+        }
+
+        .timestamp {
+            font-size: 0.8125rem;
+            color: #94a3b8;
+        }
+
+        .rating-bars {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .rating-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bar-label {
+            min-width: 140px;
+            font-size: 0.8125rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: #1e40af;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .bar-value {
+            min-width: 32px;
+            text-align: right;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .feedback-comments {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .comment-section {
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .comment-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .comment-text {
+            font-size: 0.9375rem;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .feedback-footer {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .response-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+
+        .response-tag.yes {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .response-tag.no {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .no-feedback {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-feedback-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            color: #cbd5e1;
+        }
+
+        .no-feedback h2 {
+            font-size: 1.25rem;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .no-feedback p {
+            font-size: 0.9375rem;
+            color: #94a3b8;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 24px;
+        }
+
+        .email-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: #1e40af;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .email-btn:hover {
+            background: #1e3a8a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        }
+
+        .email-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            background: #059669;
+            color: white;
+        }
+
+        .toast.error {
+            background: #dc2626;
+            color: white;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .feedback-header {
+                flex-direction: column;
+            }
+
+            .rating-bars {
+                grid-template-columns: 1fr;
+            }
+
+            .feedback-footer {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <img src="{{ url_for('static', filename='images/ShalomBeats-Logo-Original-BLUE.png') }}" alt="ShalomBeats" class="logo">
+            <span class="header-title">Feedback Dashboard</span>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Concert Feedback Results</h1>
+            <p>Overview of all submitted feedback responses</p>
+        </div>
+
+        {% if feedback_list %}
+            <div class="action-bar">
+                <button class="email-btn" id="sendReportBtn" onclick="sendReport()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    Email Report
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ feedback_list|length }}</div>
+                    <div class="stat-label">Total Responses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ "%.1f"|format(feedback_list|map(attribute='overall_rating')|map('int')|sum / feedback_list|length) }}</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ (feedback_list|selectattr('would_recommend', 'equalto', 'yes')|list|length / feedback_list|length * 100)|round|int }}%</div>
+                    <div class="stat-label">Would Recommend</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ (feedback_list|selectattr('attend_again', 'equalto', 'yes')|list|length / feedback_list|length * 100)|round|int }}%</div>
+                    <div class="stat-label">Would Attend Again</div>
+                </div>
+            </div>
+
+            <div class="feedback-list">
+                {% for feedback in feedback_list|reverse %}
+                <div class="feedback-card">
+                    <div class="feedback-header">
+                        <div class="feedback-author">
+                            <div class="author-avatar">
+                                {% if feedback.name %}
+                                    {{ feedback.name[0]|upper }}
+                                {% else %}
+                                    ?
+                                {% endif %}
+                            </div>
+                            <div class="author-info">
+                                <span class="author-name">{{ feedback.name if feedback.name else 'Anonymous' }}</span>
+                                {% if feedback.email %}
+                                    <span class="author-email">{{ feedback.email }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="feedback-meta">
+                            <span class="rating-badge">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                </svg>
+                                {{ feedback.overall_rating }}/5
+                            </span>
+                            <span class="timestamp">{{ feedback.timestamp }}</span>
+                        </div>
+                    </div>
+
+                    <div class="rating-bars">
+                        <div class="rating-bar">
+                            <span class="bar-label">Performance</span>
+                            <div class="bar-container">
+                                <div class="bar-fill" style="width: {{ feedback.performance_quality|int * 20 }}%"></div>
+                            </div>
+                            <span class="bar-value">{{ feedback.performance_quality }}/5</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span class="bar-label">Sound Quality</span>
+                            <div class="bar-container">
+                                <div class="bar-fill" style="width: {{ feedback.sound_quality|int * 20 }}%"></div>
+                            </div>
+                            <span class="bar-value">{{ feedback.sound_quality }}/5</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span class="bar-label">Venue & Atmosphere</span>
+                            <div class="bar-container">
+                                <div class="bar-fill" style="width: {{ feedback.venue_atmosphere|int * 20 }}%"></div>
+                            </div>
+                            <span class="bar-value">{{ feedback.venue_atmosphere }}/5</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span class="bar-label">Food</span>
+                            <div class="bar-container">
+                                <div class="bar-fill" style="width: {{ feedback.value_for_money|int * 20 }}%"></div>
+                            </div>
+                            <span class="bar-value">{{ feedback.value_for_money }}/5</span>
+                        </div>
+                    </div>
+
+                    {% if feedback.favorite_moment or feedback.improvements or feedback.additional_comments %}
+                    <div class="feedback-comments">
+                        {% if feedback.favorite_moment %}
+                        <div class="comment-section">
+                            <div class="comment-label">Favorite Moment</div>
+                            <div class="comment-text">{{ feedback.favorite_moment }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if feedback.improvements %}
+                        <div class="comment-section">
+                            <div class="comment-label">Suggested Improvements</div>
+                            <div class="comment-text">{{ feedback.improvements }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if feedback.additional_comments %}
+                        <div class="comment-section">
+                            <div class="comment-label">Additional Comments</div>
+                            <div class="comment-text">{{ feedback.additional_comments }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="feedback-footer">
+                        <span class="response-tag {{ 'yes' if feedback.would_recommend == 'yes' else 'no' }}">
+                            {% if feedback.would_recommend == 'yes' %}
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            {% else %}
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            {% endif %}
+                            Would Recommend
+                        </span>
+                        <span class="response-tag {{ 'yes' if feedback.attend_again == 'yes' else 'no' }}">
+                            {% if feedback.attend_again == 'yes' %}
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            {% else %}
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            {% endif %}
+                            Would Attend Again
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-feedback">
+                <svg class="no-feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <h2>No Feedback Yet</h2>
+                <p>Feedback submissions will appear here once received.</p>
+            </div>
+        {% endif %}
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function sendReport() {
+            const btn = document.getElementById('sendReportBtn');
+            const toast = document.getElementById('toast');
+
+            btn.disabled = true;
+            btn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 6v6l4 2"></path>
+                </svg>
+                Sending...
+            `;
+
+            fetch('/send-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                toast.textContent = data.message;
+                toast.className = 'toast ' + (data.success ? 'success' : 'error') + ' show';
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 4000);
+            })
+            .catch(error => {
+                toast.textContent = 'Failed to send report. Please try again.';
+                toast.className = 'toast error show';
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 4000);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    Email Report
+                `;
+            });
+        }
+    </script>
+
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+</html>

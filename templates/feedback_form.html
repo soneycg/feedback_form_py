@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShalomBeats - Concert Feedback</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo {
+            height: 60px;
+            width: auto;
+        }
+
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .page-title p {
+            font-size: 1rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .form-section:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #1e40af;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: #1e40af;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #334155;
+        }
+
+        .required {
+            color: #dc2626;
+            margin-left: 2px;
+        }
+
+        .help-text {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+        }
+
+        input[type="text"]:hover,
+        input[type="email"]:hover,
+        textarea:hover {
+            border-color: #cbd5e1;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #1e40af;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .rating-group {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .rating-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .rating-option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 8px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+        .rating-option label .rating-number {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        .rating-option label .rating-text {
+            font-size: 0.6875rem;
+            color: #94a3b8;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .rating-option label:hover {
+            border-color: #1e40af;
+            background: #eff6ff;
+        }
+
+        .rating-option input[type="radio"]:checked + label {
+            background: #1e40af;
+            border-color: #1e40af;
+        }
+
+        .rating-option input[type="radio"]:checked + label .rating-number,
+        .rating-option input[type="radio"]:checked + label .rating-text {
+            color: white;
+        }
+
+        .yes-no-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .yes-no-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .yes-no-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 0;
+        }
+
+        .yes-no-option label:hover {
+            border-color: #1e40af;
+            background: #eff6ff;
+        }
+
+        .yes-no-option input[type="radio"]:checked + label {
+            background: #1e40af;
+            border-color: #1e40af;
+            color: white;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: #1e40af;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 32px;
+        }
+
+        .submit-btn:hover {
+            background: #1e3a8a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 32px 0;
+        }
+
+        @media (max-width: 640px) {
+            .main-content {
+                padding: 24px 16px 40px;
+            }
+
+            .form-card {
+                padding: 24px 20px;
+            }
+
+            .rating-group {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 6px;
+            }
+
+            .rating-option label {
+                padding: 12px 4px;
+            }
+
+            .rating-option label .rating-number {
+                font-size: 1.125rem;
+            }
+
+            .rating-option label .rating-text {
+                font-size: 0.5625rem;
+            }
+
+            .page-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .logo {
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <img src="{{ url_for('static', filename='images/ShalomBeats-Logo-Original-BLUE.png') }}" alt="ShalomBeats" class="logo">
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="page-title">
+            <h1>Shalom Beats Musical Concert Middleton Feedback</h1>
+            <p>We value your opinion. Help us improve your experience.</p>
+        </div>
+
+        <form action="/submit" method="POST" class="form-card">
+            <section class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <h2 class="section-title">Personal Information</h2>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com">
+                    <p class="help-text">Optional. We'll only use this to follow up if needed.</p>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <section class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </div>
+                    <h2 class="section-title">Overall Experience</h2>
+                </div>
+
+                <div class="form-group">
+                    <label>Overall Rating<span class="required">*</span></label>
+                    <div class="rating-group">
+                        <div class="rating-option">
+                            <input type="radio" id="overall_1" name="overall_rating" value="1" required>
+                            <label for="overall_1">
+                                <span class="rating-number">1</span>
+                                <span class="rating-text">Poor</span>
+                            </label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="overall_2" name="overall_rating" value="2">
+                            <label for="overall_2">
+                                <span class="rating-number">2</span>
+                                <span class="rating-text">Fair</span>
+                            </label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="overall_3" name="overall_rating" value="3">
+                            <label for="overall_3">
+                                <span class="rating-number">3</span>
+                                <span class="rating-text">Good</span>
+                            </label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="overall_4" name="overall_rating" value="4">
+                            <label for="overall_4">
+                                <span class="rating-number">4</span>
+                                <span class="rating-text">Great</span>
+                            </label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="overall_5" name="overall_rating" value="5">
+                            <label for="overall_5">
+                                <span class="rating-number">5</span>
+                                <span class="rating-text">Excellent</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <section class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="8" y1="6" x2="21" y2="6"></line>
+                            <line x1="8" y1="12" x2="21" y2="12"></line>
+                            <line x1="8" y1="18" x2="21" y2="18"></line>
+                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                        </svg>
+                    </div>
+                    <h2 class="section-title">Detailed Ratings</h2>
+                </div>
+
+                <div class="form-group">
+                    <label>Performance Quality<span class="required">*</span></label>
+                    <div class="rating-group">
+                        <div class="rating-option">
+                            <input type="radio" id="perf_1" name="performance_quality" value="1" required>
+                            <label for="perf_1"><span class="rating-number">1</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="perf_2" name="performance_quality" value="2">
+                            <label for="perf_2"><span class="rating-number">2</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="perf_3" name="performance_quality" value="3">
+                            <label for="perf_3"><span class="rating-number">3</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="perf_4" name="performance_quality" value="4">
+                            <label for="perf_4"><span class="rating-number">4</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="perf_5" name="performance_quality" value="5">
+                            <label for="perf_5"><span class="rating-number">5</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Sound Quality<span class="required">*</span></label>
+                    <div class="rating-group">
+                        <div class="rating-option">
+                            <input type="radio" id="sound_1" name="sound_quality" value="1" required>
+                            <label for="sound_1"><span class="rating-number">1</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="sound_2" name="sound_quality" value="2">
+                            <label for="sound_2"><span class="rating-number">2</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="sound_3" name="sound_quality" value="3">
+                            <label for="sound_3"><span class="rating-number">3</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="sound_4" name="sound_quality" value="4">
+                            <label for="sound_4"><span class="rating-number">4</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="sound_5" name="sound_quality" value="5">
+                            <label for="sound_5"><span class="rating-number">5</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Venue & Atmosphere<span class="required">*</span></label>
+                    <div class="rating-group">
+                        <div class="rating-option">
+                            <input type="radio" id="venue_1" name="venue_atmosphere" value="1" required>
+                            <label for="venue_1"><span class="rating-number">1</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="venue_2" name="venue_atmosphere" value="2">
+                            <label for="venue_2"><span class="rating-number">2</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="venue_3" name="venue_atmosphere" value="3">
+                            <label for="venue_3"><span class="rating-number">3</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="venue_4" name="venue_atmosphere" value="4">
+                            <label for="venue_4"><span class="rating-number">4</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="venue_5" name="venue_atmosphere" value="5">
+                            <label for="venue_5"><span class="rating-number">5</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Food<span class="required">*</span></label>
+                    <div class="rating-group">
+                        <div class="rating-option">
+                            <input type="radio" id="value_1" name="value_for_money" value="1" required>
+                            <label for="value_1"><span class="rating-number">1</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="value_2" name="value_for_money" value="2">
+                            <label for="value_2"><span class="rating-number">2</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="value_3" name="value_for_money" value="3">
+                            <label for="value_3"><span class="rating-number">3</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="value_4" name="value_for_money" value="4">
+                            <label for="value_4"><span class="rating-number">4</span></label>
+                        </div>
+                        <div class="rating-option">
+                            <input type="radio" id="value_5" name="value_for_money" value="5">
+                            <label for="value_5"><span class="rating-number">5</span></label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="divider"></div>
+
+            <section class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="section-title">Your Thoughts</h2>
+                </div>
+
+                <div class="form-group">
+                    <label for="favorite_moment">What was your favorite moment of the concert?</label>
+                    <textarea id="favorite_moment" name="favorite_moment" placeholder="Share a highlight that stood out to you..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="improvements">What could be improved?</label>
+                    <textarea id="improvements" name="improvements" placeholder="Your suggestions for making future concerts even better..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Would you recommend this concert to others?<span class="required">*</span></label>
+                    <div class="yes-no-group">
+                        <div class="yes-no-option">
+                            <input type="radio" id="recommend_yes" name="would_recommend" value="yes" required>
+                            <label for="recommend_yes">Yes</label>
+                        </div>
+                        <div class="yes-no-option">
+                            <input type="radio" id="recommend_no" name="would_recommend" value="no">
+                            <label for="recommend_no">No</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Would you attend another concert by this artist/venue?<span class="required">*</span></label>
+                    <div class="yes-no-group">
+                        <div class="yes-no-option">
+                            <input type="radio" id="attend_yes" name="attend_again" value="yes" required>
+                            <label for="attend_yes">Yes</label>
+                        </div>
+                        <div class="yes-no-option">
+                            <input type="radio" id="attend_no" name="attend_again" value="no">
+                            <label for="attend_no">No</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="additional_comments">Additional Comments</label>
+                    <textarea id="additional_comments" name="additional_comments" placeholder="Anything else you'd like to share with us?"></textarea>
+                </div>
+            </section>
+
+            <button type="submit" class="submit-btn">Submit Feedback</button>
+        </form>
+    </main>
+</body>
+</html>
