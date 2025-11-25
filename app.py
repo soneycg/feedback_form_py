@@ -6,15 +6,19 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here-change-in-production'
+app.secret_key = os.getenv('SECRET_KEY', 'fallback-secret-key')
 
 FEEDBACK_FILE = 'feedback_data.json'
 
-# Admin credentials for /results page
-ADMIN_USERNAME = 'admin'
-ADMIN_PASSWORD = 'REMOVED_SECRET'
+# Admin credentials from environment
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
 
 def check_auth(username, password):
     """Check if username/password combination is valid"""
@@ -38,14 +42,14 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-# Email Configuration - Brevo SMTP
+# Email Configuration from environment
 EMAIL_CONFIG = {
-    'smtp_server': 'smtp-relay.brevo.com',
-    'smtp_port': 587,
-    'smtp_username': '9c7960001@smtp-brevo.com',
-    'smtp_password': 'REMOVED_SECRET',
-    'sender_email': 'soney@shalombeats.com',
-    'recipient_email': 'soneycgeorge@gmail.com',
+    'smtp_server': os.getenv('SMTP_SERVER'),
+    'smtp_port': int(os.getenv('SMTP_PORT', 587)),
+    'smtp_username': os.getenv('SMTP_USERNAME'),
+    'smtp_password': os.getenv('SMTP_PASSWORD'),
+    'sender_email': os.getenv('SENDER_EMAIL'),
+    'recipient_email': os.getenv('RECIPIENT_EMAIL'),
     'use_tls': True
 }
 
